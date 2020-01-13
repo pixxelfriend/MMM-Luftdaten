@@ -15,6 +15,14 @@ Module.register("MMM-Luftdaten",{
 		return "MMM-Luftdaten.njk";
 	},
 
+	// Override start method.
+	start: function () {
+		console.log("start");
+		this.sendSocketNotification("ADD_SENSOR", {
+			sensorId: this.config.feinstaubSensorId
+		});
+	},
+
 	getTemplateData: function () {
 		const airData = {
 			pm25: "7.0", // P2
