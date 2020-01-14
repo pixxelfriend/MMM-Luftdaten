@@ -1,9 +1,8 @@
 Module.register("MMM-Luftdaten",{
 	//default module config
 	defaults: {
-		feinstaubSensorId: "37447",
-		temperatureSensorId: "37448",
-		sensorApi: "http://data.sensor.community/airrohr/v1/sensor/",
+		sensors: [37447,37448],
+		sensorData: {},
 	},
 
 	// Define required scripts.
@@ -17,21 +16,32 @@ Module.register("MMM-Luftdaten",{
 
 	// Override start method.
 	start: function () {
-		console.log("start");
-		this.sendSocketNotification("ADD_SENSOR", {
-			sensorId: this.config.feinstaubSensorId
-		});
+		console.log("start", this.defaults.sensors);
+		for(let index of this.defaults.sensors){
+			this.sendSocketNotification("ADD_SENSOR", {
+				sensorId: index
+			});
+		}
+	},
+	// Override socket notification handler.
+	socketNotificationReceived: function (notification, payload) {
+		if (notification === "SENSOR_DATA_RECEIVED") {
+			//console.log("SENSOR_DATA_RECEIVED",payload);
+			if(payload.sensorData){
+				this.defaults.sensorData = payload.sensorData;
+			}
+		} else {
+			Log.log("MMM-Luftdatan received an unknown socket notification: " + notification);
+		}
+
+		this.updateDom(this.config.animationSpeed);
 	},
 
 	getTemplateData: function () {
-		const airData = {
-			pm25: "7.0", // P2
-			pm10: "6.85", // P1
-			temperature: "5.15",
-			pressure: Math.round(parseFloat("100313.665")) / 100,
-			humidity: "77.84",
-			date: "2020-01-13 20:36:38"
-		};
-		return airData;
+		return {
+			...this.defaults.sensorData,
+			pressure: Math.round(parseFloat(this.defaults.sensorData.pressure)) / 100,
+			lastUpdate: new Date(this.defaults.sensorData.lastUpdate).toLocaleString()
+		}
 	}
 });
