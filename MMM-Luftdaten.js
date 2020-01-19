@@ -3,6 +3,7 @@ Module.register("MMM-Luftdaten",{
 	defaults: {
 		sensors: [37447,37448],
 		sensorData: {},
+		fetchInterval: 5 // update intervall in minutes
 	},
 
 	// Define required scripts.
@@ -16,12 +17,15 @@ Module.register("MMM-Luftdaten",{
 
 	// Override start method.
 	start: function () {
-		console.log("start", this.defaults.sensors);
 		for(let index of this.defaults.sensors){
-			this.sendSocketNotification("ADD_SENSOR", {
-				sensorId: index
-			});
+			//inital fetch of sensor data
+			this.addSensor(index,this.defaults.fetchInterval)
 		}
+	},
+	addSensor: function(sensorId, fetchInterval){
+		this.sendSocketNotification("ADD_SENSOR", {
+			sensorId, fetchInterval
+		});
 	},
 	// Override socket notification handler.
 	socketNotificationReceived: function (notification, payload) {

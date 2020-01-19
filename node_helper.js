@@ -12,7 +12,8 @@ module.exports = NodeHelper.create({
 			temperature: "temperature",
 			pressure: "pressure",
 			humidity: "humidity",
-		}
+		},
+		sensors: {}
 	},
 	// Override start method.
 	start: function() {
@@ -23,11 +24,29 @@ module.exports = NodeHelper.create({
 	// Override socketNotificationReceived method.
 	socketNotificationReceived: function(notification, payload) {
 		if (notification === "ADD_SENSOR") {
-			console.log("ADD_SENSOR:",payload);
-			if(payload && payload.sensorId){
-				this.fetchData(payload.sensorId);
+
+			var {sensorId, fetchInterval} = payload;
+			var instance = this;
+
+			if(payload && sensorId && fetchInterval){
+
+				if(!this.state.sensors[sensorId]) {
+					instance.fetchData(sensorId);
+					this.state.sensors[sensorId] = setInterval(function(){
+						instance.fetchData(sensorId);
+					},this.getUpdateInterval(fetchInterval));
+				} else {
+					//when sensor already exists, directly update data on all clients
+					this.sendDataToClient();
+				}
 			}
 		}
+	},
+	sendDataToClient: function(){
+		this.sendSocketNotification("SENSOR_DATA_RECEIVED", {
+			sensorData: this.state.sensorData,
+			lastUpdate: this.state.sensorData["lastUpdate"]
+		});
 	},
 	// Update Sensor Data.
 	updateSensorData: function(sensors,timestamp) {
@@ -41,11 +60,8 @@ module.exports = NodeHelper.create({
 		if(timestamp) {
 			this.state.sensorData["lastUpdate"] = timestamp;
 		}
-		this.sendSocketNotification("SENSOR_DATA_RECEIVED", {
-			sensorData: this.state.sensorData,
-			lastUpdate: timestamp
-		});
-		console.log("SensorDataUpdated:", this.state.sensorData, timestamp);
+		this.sendDataToClient();
+		//console.log("SensorDataUpdated:", this.state.sensorData, timestamp);
 	},
 	getSensorKeyFromType(name){
 		return this.state.sensorTypeAssignments[name];
@@ -80,4 +96,7 @@ module.exports = NodeHelper.create({
 			});
 		}
 	},
+	getUpdateInterval(minutes){
+		return minutes * 60 * 1000;
+	}
 });
