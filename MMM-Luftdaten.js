@@ -3,12 +3,18 @@ Module.register("MMM-Luftdaten",{
 	defaults: {
 		sensors: [37447,37448],
 		sensorData: {},
-		fetchInterval: 5 // update intervall in minutes
+		fetchInterval: 5, // update intervall in minutes
+		timeOnly: true,
 	},
 
 	// Define required scripts.
 	getStyles: function () {
 		return ["MMM-Luftdaten.css"];
+	},
+
+	// Define required scripts.
+	getScripts: function () {
+		return ["moment.js"];
 	},
 
 	getTemplate: function () {
@@ -30,7 +36,6 @@ Module.register("MMM-Luftdaten",{
 	// Override socket notification handler.
 	socketNotificationReceived: function (notification, payload) {
 		if (notification === "SENSOR_DATA_RECEIVED") {
-			//console.log("SENSOR_DATA_RECEIVED",payload);
 			if(payload.sensorData){
 				this.defaults.sensorData = payload.sensorData;
 			}
@@ -45,7 +50,11 @@ Module.register("MMM-Luftdaten",{
 		return {
 			...this.defaults.sensorData,
 			pressure: Math.round(parseFloat(this.defaults.sensorData.pressure)) / 100,
-			lastUpdate: new Date(this.defaults.sensorData.lastUpdate).toLocaleString()
+			lastUpdate: this.formatDate(this.defaults.sensorData.lastUpdate)
 		}
+	},
+	formatDate: function (dateString){
+		const format = this.defaults.timeOnly ? "LT" : "L LT"
+		return moment(dateString).format(format)
 	}
 });
