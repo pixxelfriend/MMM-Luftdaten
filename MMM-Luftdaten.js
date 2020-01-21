@@ -5,7 +5,7 @@ Module.register("MMM-Luftdaten",{
 		sensorData: {},
 		fetchInterval: 5, // update intervall in minutes
 		timeOnly: true,
-		withBorder: false,
+		withBorder: true,
 		borderClass: "border",
 	},
 
