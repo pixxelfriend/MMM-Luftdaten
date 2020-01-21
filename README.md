@@ -2,6 +2,8 @@
 
 This is a [Magic Mirror²](https://magicmirror.builders/) module which displays measured data of your `#airrohr` air quality sensor. It fetches the data regulary from [Luftdaten.info](https://luftdaten.info/) and displays it right on your mirror. The module should support any kind of temperature and particular matter sensor, aso long as they are listed on Luftdaten.info
 
+![MMM-Luftdaten](/screenshot/mmm-luftdaten.png) ![MMM-Luftdaten-Border](/screenshot/mmm-luftdaten-border.png)
+
 ### Howto get my sensor id?
 
 Login to [https://meine.luftdaten.info](https://meine.luftdaten.info) go to `"My sensors"`.
