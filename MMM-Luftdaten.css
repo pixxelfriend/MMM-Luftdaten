@@ -1,10 +1,14 @@
 .MMM-Luftdaten {
-    border: 1px solid #3c3c3b;
     border-radius: 10px;
     font-size: 0.8em;
     line-height: 1.2em;
-    min-width: 240px;
+    min-width: 300px;
 }
+
+.MMM-Luftdaten.border {
+    border: 1px solid #3c3c3b;
+}
+
 .MMM-Luftdaten .header,
 .MMM-Luftdaten .footer {
     font-size: 1em;

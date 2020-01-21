@@ -5,6 +5,8 @@ Module.register("MMM-Luftdaten",{
 		sensorData: {},
 		fetchInterval: 5, // update intervall in minutes
 		timeOnly: true,
+		withBorder: false,
+		borderClass: "border",
 	},
 
 	// Define required scripts.
@@ -50,7 +52,8 @@ Module.register("MMM-Luftdaten",{
 		return {
 			...this.defaults.sensorData,
 			pressure: Math.round(parseFloat(this.defaults.sensorData.pressure)) / 100,
-			lastUpdate: this.formatDate(this.defaults.sensorData.lastUpdate)
+			lastUpdate: this.formatDate(this.defaults.sensorData.lastUpdate),
+			borderClass: this.defaults.withBorder ? this.defaults.borderClass : ''
 		}
 	},
 	formatDate: function (dateString){
