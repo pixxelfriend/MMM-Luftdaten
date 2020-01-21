@@ -1,7 +1,7 @@
 Module.register("MMM-Luftdaten",{
 	//default module config
 	defaults: {
-		sensors: [37447,37448],
+		sensors: [],
 		sensorData: {},
 		fetchInterval: 5, // update intervall in minutes
 		timeOnly: true,
@@ -33,6 +33,10 @@ Module.register("MMM-Luftdaten",{
 
 	// Override start method.
 	start: function () {
+		this.defaults = {
+			...this.defaults,
+			...this.config
+		}
 		for(let index of this.defaults.sensors){
 			//inital fetch of sensor data
 			this.addSensor(index,this.defaults.fetchInterval)
