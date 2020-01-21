@@ -55,6 +55,6 @@ Module.register("MMM-Luftdaten",{
 	},
 	formatDate: function (dateString){
 		const format = this.defaults.timeOnly ? "LT" : "L LT"
-		return moment(dateString).format(format)
+		return moment.utc(dateString).format(format)
 	}
 });
