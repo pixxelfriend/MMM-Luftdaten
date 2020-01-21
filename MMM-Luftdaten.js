@@ -19,6 +19,14 @@ Module.register("MMM-Luftdaten",{
 		return ["moment.js"];
 	},
 
+		// Define required translations.
+		getTranslations: function() {
+			return {
+				en: "translations/en.json",
+				de: "translations/de.json",
+			};
+		},
+
 	getTemplate: function () {
 		return "MMM-Luftdaten.njk";
 	},
@@ -53,7 +61,10 @@ Module.register("MMM-Luftdaten",{
 			...this.defaults.sensorData,
 			pressure: Math.round(parseFloat(this.defaults.sensorData.pressure)) / 100,
 			lastUpdate: this.formatDate(this.defaults.sensorData.lastUpdate),
-			borderClass: this.defaults.withBorder ? this.defaults.borderClass : ''
+			borderClass: this.defaults.withBorder ? this.defaults.borderClass : '',
+			/** current workaround, because calling the translation method is not possible in njk */
+			pressureLabel: this.translate("PRESSURE"),
+			humidityLabel:  this.translate("HUMIDITY"),
 		}
 	},
 	formatDate: function (dateString){
