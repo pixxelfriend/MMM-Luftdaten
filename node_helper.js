@@ -67,7 +67,7 @@ module.exports = NodeHelper.create({
 		return this.state.sensorTypeAssignments[name];
 	},
 	isValidSensorType(name){
-		return this.state.sensorTypeAssignments[name] || false
+		return this.state.sensorTypeAssignments[name] || false;
 	},
 	fetchData(sensorId){
 		if(sensorId){
