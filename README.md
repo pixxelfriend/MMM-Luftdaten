@@ -20,6 +20,7 @@ Alternativly, you can search for a sensor near your locatopn on the [fine dust m
 | timeOnly | `false` | Display time without date. Setting to true will hide the date.
 | withBorder | `true` | Display a border around the module
 | borderClass | `border` | Default CSS class name of the border.
+| displayTendency| `true` | Display an arrow, if the measured values are growing or falling, depending on the last value
 
 ### Configuration Example
 ````javascript

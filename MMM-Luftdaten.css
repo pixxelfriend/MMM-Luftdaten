@@ -28,6 +28,18 @@
 }
 .MMM-Luftdaten .sensor {
     padding: 0 0.4em;
+    align-items: center;
     display: flex;
     justify-content: space-between;
+}
+.MMM-Luftdaten .sensor .label {
+    flex-grow: 1;
+    text-align: left;
+}
+.MMM-Luftdaten .sensor i {
+    margin: 2px;
+}
+
+.MMM-Luftdaten i.tendency {
+    font-size: 76%;
 }

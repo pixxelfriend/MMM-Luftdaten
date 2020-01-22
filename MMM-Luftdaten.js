@@ -7,6 +7,7 @@ Module.register("MMM-Luftdaten",{
 		timeOnly: true,
 		withBorder: true,
 		borderClass: "border",
+		displayTendency: true
 	},
 
 	// Define required scripts.
@@ -51,7 +52,8 @@ Module.register("MMM-Luftdaten",{
 	socketNotificationReceived: function (notification, payload) {
 		if (notification === "SENSOR_DATA_RECEIVED") {
 			if(payload.sensorData){
-				this.defaults.sensorData = payload.sensorData;
+				this.defaults.lastUpdate = payload.sensorData.lastUpdate
+				this.defaults.sensorData = this.createSensorTemplateData(payload.sensorData)
 			}
 		} else {
 			Log.log("MMM-Luftdatan received an unknown socket notification: " + notification);
@@ -60,16 +62,43 @@ Module.register("MMM-Luftdaten",{
 		this.updateDom(this.config.animationSpeed);
 	},
 
-	getTemplateData: function () {
-		return {
-			...this.defaults.sensorData,
-			pressure: Math.round(parseFloat(this.defaults.sensorData.pressure)) / 100,
-			lastUpdate: this.formatDate(this.defaults.sensorData.lastUpdate),
-			borderClass: this.defaults.withBorder ? this.defaults.borderClass : '',
-			/** current workaround, because calling the translation method is not possible in njk */
-			pressureLabel: this.translate("PRESSURE"),
-			humidityLabel:  this.translate("HUMIDITY"),
+	createSensorTemplateData: function (data){
+		const sensors = {}
+		delete data.lastUpdate;
+		for(let key in data){
+			const sensor = {}
+			sensor.value = parseFloat(data[key])
+			switch(key){
+				case "pressure":
+					sensor.label = this.translate("PRESSURE");
+					sensor.value = Math.round(parseFloat(sensor.value)) / 100;
+					break;
+				case "humidity":
+					sensor.label = this.translate("HUMIDITY");
+					break;
+				default:
+					break;
+			}
+
+			if(this.defaults.displayTendency && this.defaults.sensorData[key]){
+				sensor.tendency = this.getTendency(this.defaults.sensorData[key].value, sensor.value)
+			}
+			sensors[key] = sensor
 		}
+		return sensors
+	},
+	getTendency: function(oldValue, newValue){
+		if(oldValue === newValue) return false;
+		if(oldValue < newValue) return "up"
+		return "down"
+	},
+	getTemplateData: function () {
+		const data = {
+			...this.defaults.sensorData,
+			lastUpdate: this.formatDate(this.defaults.lastUpdate),
+			borderClass: this.defaults.withBorder ? this.defaults.borderClass : '',
+		}
+		return data;
 	},
 	formatDate: function (dateString){
 		const format = this.defaults.timeOnly ? "LT" : "L LT"

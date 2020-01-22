@@ -1,21 +1,27 @@
 <div class="MMM-Luftdaten {{ borderClass }}">
-    <div class="header"><i class="fas fa-thermometer-half"></i>
- {{temperature }} °C</div>
+    <div class="header">
+        <i class="fas fa-thermometer-half"></i> {{ temperature.value }} °C
+        {% if temperature.tendency %}  <i class="far fa-arrow-alt-circle-{{ temperature.tendency }} tendency"></i> {% endif %}
+    </div>
      <div class="sensor">
-        <span>{{ pressureLabel }}</span>
-        <span>{{ pressure }} hPa</span>
+        <span class="label">{{ pressure.label }}</span>
+        {% if pressure.tendency %} <i class="far fa-arrow-alt-circle-{{ pressure.tendency }} tendency"></i> {% endif %}
+        <span>{{ pressure.value }} hPa</span>
     </div>
     <div class="sensor">
-        <span>{{ humidityLabel }}</span>
-        <span>{{ humidity }} %</span>
+        <span class="label">{{ humidity.label }}</span>
+        {% if humidity.tendency %} <i class="far fa-arrow-alt-circle-{{ humidity.tendency }} tendency "></i> {% endif %}
+        <span>{{ humidity.value }} %</span>
     </div>
     <div class="sensor">
-        <span>PM2.5</span>
-        <span>{{ pm25 }} µg/m³</span>
+        <span class="label">PM2.5</span>
+        {% if pm25.tendency %} <i class="far fa-arrow-alt-circle-{{ pm25.tendency }} tendency"></i> {% endif %}
+        <span>{{ pm25.value }} µg/m³</span>
     </div>
     <div class="sensor">
-        <span>PM10</span>
-        <span>{{ pm10 }} µg/m³</span>
+        <span class="label">PM10</span>
+        {% if pm10.tendency %} <i class="far fa-arrow-alt-circle-{{ pm10.tendency }} tendency"></i> {% endif %}
+        <span>{{ pm10.value }} µg/m³</span>
     </div>
     <div class="footer"><i class="fas fa-history"></i> {{ lastUpdate }}</div>
 </div>
