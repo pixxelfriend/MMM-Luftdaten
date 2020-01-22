@@ -19,13 +19,13 @@ Module.register("MMM-Luftdaten",{
 		return ["moment.js"];
 	},
 
-		// Define required translations.
-		getTranslations: function() {
-			return {
-				en: "translations/en.json",
-				de: "translations/de.json",
-			};
-		},
+	// Define required translations.
+	getTranslations: function() {
+		return {
+			en: "translations/en.json",
+			de: "translations/de.json",
+		};
+	},
 
 	getTemplate: function () {
 		return "MMM-Luftdaten.njk";
@@ -73,6 +73,7 @@ Module.register("MMM-Luftdaten",{
 	},
 	formatDate: function (dateString){
 		const format = this.defaults.timeOnly ? "LT" : "L LT"
-		return moment.utc(dateString).format(format)
+		const date = moment.utc(dateString).local()
+		return date.format(format)
 	}
 });
