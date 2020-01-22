@@ -97,6 +97,7 @@ module.exports = NodeHelper.create({
 		}
 	},
 	getUpdateInterval(minutes){
-		return minutes * 60 * 1000;
+		const min = !minutes || minutes < 5 ? 5 : minutes;
+		return min * 60 * 1000;
 	}
 });
