@@ -14,11 +14,11 @@
     font-size: 1em;
     line-height: 1em;
     padding: 0.25em;
-    color: #fff;
     text-align: center;
 }
 
 .MMM-Luftdaten .header {
+    color: #fff;
     font-size: 1.5em;
     border-bottom: 1px solid #3c3c3b;
 }

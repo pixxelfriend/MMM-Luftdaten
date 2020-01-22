@@ -1,5 +1,6 @@
 <div class="MMM-Luftdaten {{ borderClass }}">
-    <div class="header">{{temperature }} °C</div>
+    <div class="header"><i class="fas fa-thermometer-half"></i>
+ {{temperature }} °C</div>
      <div class="sensor">
         <span>{{ pressureLabel }}</span>
         <span>{{ pressure }} hPa</span>
@@ -16,5 +17,5 @@
         <span>PM10</span>
         <span>{{ pm10 }} µg/m³</span>
     </div>
-    <div class="footer">{{ lastUpdate }}</div>
+    <div class="footer"><i class="fas fa-history"></i> {{ lastUpdate }}</div>
 </div>

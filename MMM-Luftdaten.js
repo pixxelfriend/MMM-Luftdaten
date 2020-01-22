@@ -11,7 +11,7 @@ Module.register("MMM-Luftdaten",{
 
 	// Define required scripts.
 	getStyles: function () {
-		return ["MMM-Luftdaten.css"];
+		return ["MMM-Luftdaten.css","font-awesome.css"];
 	},
 
 	// Define required scripts.
