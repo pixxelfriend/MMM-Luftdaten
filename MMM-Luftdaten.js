@@ -38,14 +38,20 @@ Module.register("MMM-Luftdaten",{
 			...this.defaults,
 			...this.config
 		}
-		for(let index of this.defaults.sensors){
-			//inital fetch of sensor data
-			this.addSensor(index,this.defaults.fetchInterval)
+		const {sensorHost} = this.defaults
+		if(sensorHost){
+			const sensorIsHost = sensorHost ? true : false
+			this.addSensor(sensorHost,this.defaults.fetchInterval, sensorIsHost)
+		} else {
+			for(let index of this.defaults.sensors){
+				//inital fetch of sensor data
+				this.addSensor(index,this.defaults.fetchInterval)
+			}
 		}
 	},
-	addSensor: function(sensorId, fetchInterval){
+	addSensor: function(sensorId, fetchInterval, sensorIsHost){
 		this.sendSocketNotification("ADD_SENSOR", {
-			sensorId, fetchInterval
+			sensorId, fetchInterval, sensorIsHost
 		});
 	},
 	// Override socket notification handler.
