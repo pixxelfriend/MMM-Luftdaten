@@ -83,7 +83,7 @@ module.exports = NodeHelper.create({
     let url;
 
     if (this.state.sensorHost) {
-      url = `http://${this.state.sensorHost}/data.json`
+      url = `http://${this.state.sensorHost}/data.json`;
     } else if (sensorId) {
       url = this.state.sensorApi + sensorId + "/";
     }
