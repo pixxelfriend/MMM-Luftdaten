@@ -23,5 +23,16 @@
         {% if pm10.tendency %} <i class="far fa-arrow-alt-circle-{{ pm10.tendency }} tendency"></i> {% endif %}
         <span>{{ pm10.value }} µg/m³</span>
     </div>
-    <div class="footer"><i class="fas fa-history"></i> {{ lastUpdate }}</div>
+    <div class="footer">
+        {% if connected %}
+            <i class="fas fa-history"></i> {{ lastUpdate }}
+        {% endif %}
+        {% if not connected %}
+            <i class="fas fa-history"></i> {{ text.CONNECTING }}
+        {% endif %}
+        {% if error %}
+            <br />
+            {{ text.CONNECTION_ERROR }}
+        {% endif %}
+    </div>
 </div>
