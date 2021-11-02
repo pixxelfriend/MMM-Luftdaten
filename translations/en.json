@@ -1,4 +1,6 @@
 {
     "PRESSURE": "Pressure",
-    "HUMIDITY": "Humidity"
+    "HUMIDITY": "Humidity",
+    "CONNECTING": "connecting...",
+    "CONNECTION_ERROR": "Connection Error. Please check your logs!"
 }

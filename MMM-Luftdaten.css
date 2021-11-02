@@ -1,7 +1,7 @@
 .MMM-Luftdaten {
     border-radius: 10px;
-    font-size: 0.8em;
-    line-height: 1.2em;
+    font-size: 0.8rem;
+    line-height: 1.2rem;
     min-width: 300px;
 }
 
@@ -11,23 +11,23 @@
 
 .MMM-Luftdaten .header,
 .MMM-Luftdaten .footer {
-    font-size: 1em;
-    line-height: 1em;
-    padding: 0.25em;
+    font-size: 1rem;
+    line-height: 1rem;
+    padding: 0.25rem;
     text-align: center;
 }
 
 .MMM-Luftdaten .header {
     color: #fff;
-    font-size: 1.5em;
+    font-size: 1.5rem;
     border-bottom: 1px solid #3c3c3b;
 }
 .MMM-Luftdaten .footer {
-    font-size: 0.7em;
+    font-size: 0.8rem;
     border-top: 1px solid #3c3c3b;
 }
 .MMM-Luftdaten .sensor {
-    padding: 0 0.4em;
+    padding: 0 0.4rem;
     align-items: center;
     display: flex;
     justify-content: space-between;

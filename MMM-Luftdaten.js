@@ -7,7 +7,9 @@ Module.register("MMM-Luftdaten",{
 		timeOnly: false,
 		withBorder: true,
 		borderClass: "border",
-		displayTendency: true
+		displayTendency: true,
+		connected: false,
+		error: false
 	},
 
 	// Define required scripts.
@@ -38,22 +40,35 @@ Module.register("MMM-Luftdaten",{
 			...this.defaults,
 			...this.config
 		}
-		for(let index of this.defaults.sensors){
-			//inital fetch of sensor data
-			this.addSensor(index,this.defaults.fetchInterval)
+		const {sensorHost} = this.defaults
+		if(sensorHost){
+			const sensorIsHost = sensorHost ? true : false
+			this.addSensor(sensorHost,this.defaults.fetchInterval, sensorIsHost)
+		} else {
+			for(let index of this.defaults.sensors){
+				//inital fetch of sensor data
+				this.addSensor(index,this.defaults.fetchInterval)
+			}
 		}
 	},
-	addSensor: function(sensorId, fetchInterval){
+	addSensor: function(sensorId, fetchInterval, sensorIsHost){
 		this.sendSocketNotification("ADD_SENSOR", {
-			sensorId, fetchInterval
+			sensorId, fetchInterval, sensorIsHost
 		});
 	},
 	// Override socket notification handler.
 	socketNotificationReceived: function (notification, payload) {
 		if (notification === "SENSOR_DATA_RECEIVED") {
 			if(payload.sensorData){
+				this.defaults.error = false
+				this.defaults.connected = true
 				this.defaults.lastUpdate = payload.sensorData.lastUpdate
 				this.defaults.sensorData = this.createSensorTemplateData(payload.sensorData)
+			}
+		} else if(notification === "SENSOR_DATA_CONNECTION_ERROR"){
+			this.defaults.error = true
+			if(payload.lastUpdate) {
+				this.defaults.lastUpdate = payload.lastUpdate
 			}
 		} else {
 			Log.log("MMM-Luftdatan received an unknown socket notification: " + notification);
@@ -97,6 +112,12 @@ Module.register("MMM-Luftdaten",{
 			...this.defaults.sensorData,
 			lastUpdate: this.formatDate(this.defaults.lastUpdate),
 			borderClass: this.defaults.withBorder ? this.defaults.borderClass : '',
+			connected: this.defaults.connected,
+			error: this.defaults.error,
+			text: {
+				CONNECTING: this.translate("CONNECTING"),
+				CONNECTION_ERROR: this.translate("CONNECTION_ERROR")
+			}
 		}
 		return data;
 	},

@@ -1,4 +1,6 @@
 {
     "PRESSURE": "Luftdruck",
-    "HUMIDITY": "Luftfeuchtigkeit"
+    "HUMIDITY": "Luftfeuchtigkeit",
+    "CONNECTING": "Verbinde...",
+    "CONNECTION_ERROR": "Verbindungsfehler. Bitte Logs prüfen"
 }
