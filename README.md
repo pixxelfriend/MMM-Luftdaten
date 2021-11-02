@@ -16,6 +16,7 @@ Alternativly, you can search for a sensor near your locatopn on the [fine dust m
 | Option      | Default         | Description
 | ------------|---------------- | -----------
 | sensors | `[]` | Comma seperated list of your two sensor id´s. We currently support one Sensor of any kind (PM2.5, PM10, temperature, humidity, pressure)
+| sensorHost | `undefined`| Direct connection to your sensor. Then its possible to fetch the data directly via wifi. `sensors` option will be ignored then
 | fetchInterval | `5` | Update interval in minutes. Keep in mind, that your should not updaten more often than your sensor measures. Typically their interval is between 3 an 5 minutes. So 5-10 Minutes is a good value, to save date.
 | timeOnly | `false` | Display time without date. Setting this to true will hide the date.
 | withBorder | `true` | Display a border around the module
