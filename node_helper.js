@@ -48,6 +48,11 @@ module.exports = NodeHelper.create({
       lastUpdate: this.state.sensorData["lastUpdate"]
     });
   },
+  sendErrorToClient: function () {
+    this.sendSocketNotification("SENSOR_DATA_CONNECTION_ERROR", {
+      lastUpdate: this.state.sensorData["lastUpdate"]
+    });
+  },
   // Update Sensor Data.
   updateSensorData: function (sensors, timestamp) {
     for (let index in sensors) {
@@ -87,6 +92,7 @@ module.exports = NodeHelper.create({
       console.error(
         `${this.moduleName}:  missconfiguration sensorHost or sensorIds has to be set!`
       );
+      this.sendErrorToClient();
       return;
     }
 
@@ -95,10 +101,13 @@ module.exports = NodeHelper.create({
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
-
         if (Array.isArray(data)) {
-          const { sensordatavalues, timestamp } = data[0];
-          instance.updateSensorData(sensordatavalues, timestamp);
+          if (data.length) {
+            const { sensordatavalues, timestamp } = data[0];
+            instance.updateSensorData(sensordatavalues, timestamp);
+          } else {
+            throw `Empty response`;
+          }
         } else if (Array.isArray(data.sensordatavalues)) {
           instance.updateSensorData(data.sensordatavalues, new Date());
         }
@@ -108,6 +117,7 @@ module.exports = NodeHelper.create({
       }
     } catch (e) {
       console.error(`${this.moduleName}: ${e}`);
+      this.sendErrorToClient();
     }
   },
   getUpdateInterval(minutes) {
