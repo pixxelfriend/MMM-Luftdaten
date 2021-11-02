@@ -1,7 +1,9 @@
 var NodeHelper = require("node_helper");
 const fetch = require("node-fetch");
+// const AbortController = require("abort-controller");
 
 module.exports = NodeHelper.create({
+  moduleName: "MMM-Luftdaten",
   state: {
     sensorApi: "https://data.sensor.community/airrohr/v1/sensor/",
     sensorHost: null,
@@ -12,27 +14,27 @@ module.exports = NodeHelper.create({
       P2: "pm25",
       temperature: "temperature",
       pressure: "pressure",
-      humidity: "humidity",
+      humidity: "humidity"
     },
     sensors: {}
   },
   // Override start method.
-  start: function() {
+  start: function () {
     this.fetchers = [];
     console.log("Starting node helper for: " + this.name);
   },
   // Override socketNotificationReceived method.
-  socketNotificationReceived: function(notification, payload) {
+  socketNotificationReceived: function (notification, payload) {
     if (notification === "ADD_SENSOR") {
       var { sensorId, fetchInterval, sensorIsHost } = payload;
       var instance = this;
-      if(sensorIsHost) this.state.sensorHost = sensorId;
-      if (payload && sensorId && fetchInterval){
-        if(!this.state.sensors[sensorId]) {
+      if (sensorIsHost) this.state.sensorHost = sensorId;
+      if (payload && sensorId && fetchInterval) {
+        if (!this.state.sensors[sensorId]) {
           instance.fetchApiData(sensorId);
-          this.state.sensors[sensorId] = setInterval(function(){
+          this.state.sensors[sensorId] = setInterval(function () {
             instance.fetchApiData(sensorId);
-          },this.getUpdateInterval(fetchInterval));
+          }, this.getUpdateInterval(fetchInterval));
         } else {
           //when sensor already exists, directly update data on all clients
           this.sendDataToClient();
@@ -40,15 +42,15 @@ module.exports = NodeHelper.create({
       }
     }
   },
-  sendDataToClient: function() {
+  sendDataToClient: function () {
     this.sendSocketNotification("SENSOR_DATA_RECEIVED", {
       sensorData: this.state.sensorData,
       lastUpdate: this.state.sensorData["lastUpdate"]
     });
   },
   // Update Sensor Data.
-  updateSensorData: function(sensors,timestamp) {
-    for (let index in sensors){
+  updateSensorData: function (sensors, timestamp) {
+    for (let index in sensors) {
       const sensor = sensors[index];
       let sensorType = sensor.value_type;
       if (sensorType.includes("_")) {
@@ -60,48 +62,55 @@ module.exports = NodeHelper.create({
         this.state.sensorData[type] = sensor.value;
       }
     }
-    if(timestamp) {
+    if (timestamp) {
       this.state.sensorData["lastUpdate"] = timestamp;
     }
     this.sendDataToClient();
     //console.log("SensorDataUpdated:", this.state.sensorData, timestamp);
   },
-  getSensorKeyFromType(name){
+  getSensorKeyFromType(name) {
     return this.state.sensorTypeAssignments[name];
   },
-  isValidSensorType(name){
+  isValidSensorType(name) {
     return this.state.sensorTypeAssignments[name] || false;
   },
-  async fetchApiData(sensorId){
+  async fetchApiData(sensorId) {
     let url;
 
-    if(this.state.sensorHost){
+    if (this.state.sensorHost) {
       url = `http://${this.state.sensorHost}/data.json`
-    } else if (sensorId){
+    } else if (sensorId) {
       url = this.state.sensorApi + sensorId + "/";
     }
-    console.log("fetchData from", url);
-    if(!url){
-      console.error("MMM-Luftdatem missconfiguration");
-      return
+    console.log(`${this.moduleName}: fetchData from ${url}`);
+    if (!url) {
+      console.error(
+        `${this.moduleName}:  missconfiguration sensorHost or sensorIds has to be set!`
+      );
+      return;
     }
+
     const instance = this;
-    const response = await fetch(url);
-    if (response.ok) {
-      const data = await response.json();
-      //console.log("data", data);
-      if (Array.isArray(data)) {
-        const { sensordatavalues, timestamp } = data[0];
-        instance.updateSensorData(sensordatavalues, timestamp);
-      } else if (Array.isArray(data.sensordatavalues)) {
-        instance.updateSensorData(data.sensordatavalues, new Date());
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+          const { sensordatavalues, timestamp } = data[0];
+          instance.updateSensorData(sensordatavalues, timestamp);
+        } else if (Array.isArray(data.sensordatavalues)) {
+          instance.updateSensorData(data.sensordatavalues, new Date());
+        }
+      } else {
+        const error = response.text();
+        throw `No positive response ${error}`;
       }
-    } else {
-      const error = response.text();
-      console.error("RESPONSE error:", error); // Print the error if one occurred
+    } catch (e) {
+      console.error(`${this.moduleName}: ${e}`);
     }
   },
-  getUpdateInterval(minutes){
+  getUpdateInterval(minutes) {
     const min = !minutes || minutes < 5 ? 5 : minutes;
     return min * 60 * 1000;
   }
