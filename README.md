@@ -9,7 +9,7 @@ This is a [Magic Mirror²](https://magicmirror.builders/) module which displays 
 Login to [https://meine.luftdaten.info](https://meine.luftdaten.info) go to `"My sensors"`.
 Your node will typically have two sensors attached. One particulate matter sensor and one temperature / humidity / pressure sensor. You´ll need to add both Sensor ID's to your config.
 
-Alternativly, you can search for a sensor near your locatopn on the [fine dust map](https://maps.luftdaten.info/). There you´ll have to click on a location and select pm10 and temperature. Copy the sensor ids beginning with an # from the table on the right side of the page.
+Alternativly, you can search for a sensor near your location on the [fine dust map](https://maps.luftdaten.info/). There you´ll have to click on a location and select pm10 and temperature. Copy the sensor ids beginning with an # from the table on the right side of the page.
 
 ### Configuration
 
