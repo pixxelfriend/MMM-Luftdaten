@@ -1,5 +1,4 @@
 var NodeHelper = require("node_helper");
-const fetch = require("node-fetch");
 // const AbortController = require("abort-controller");
 
 module.exports = NodeHelper.create({
