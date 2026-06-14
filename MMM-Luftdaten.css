@@ -1,105 +1,45 @@
 .MMM-Luftdaten {
-    border-radius: 12px;
-    font-size: 0.85rem;
-    line-height: 1.4rem;
-    min-width: 320px;
-    padding: 0.5rem;
-    transition: all 0.3s ease;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    line-height: 1.2rem;
+    min-width: 300px;
 }
 
 .MMM-Luftdaten.border {
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.02);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid #3c3c3b;
 }
 
 .MMM-Luftdaten .header,
 .MMM-Luftdaten .footer {
-    padding: 0.5rem 0.25rem;
+    font-size: 1rem;
+    line-height: 1rem;
+    padding: 0.25rem;
     text-align: center;
 }
 
 .MMM-Luftdaten .header {
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 1.6rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 0.25rem;
+    color: #fff;
+    font-size: 1.5rem;
+    border-bottom: 1px solid #3c3c3b;
 }
-
-.MMM-Luftdaten .header i {
-    color: #ff7b54; /* Warm coral accent */
-    filter: drop-shadow(0 0 4px rgba(255, 123, 84, 0.4));
-    animation: pulse-soft 3s infinite ease-in-out;
-}
-
 .MMM-Luftdaten .footer {
-    font-size: 0.75rem;
-    color: #888888;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    border-top: 1px solid #3c3c3b;
 }
-
-.MMM-Luftdaten .footer i {
-    color: #00adb5;
-}
-
 .MMM-Luftdaten .sensor {
-    padding: 0.4rem 0.6rem;
+    padding: 0 0.4rem;
     align-items: center;
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    transition: background 0.2s ease;
-    gap: 10px;
 }
-
-.MMM-Luftdaten .sensor:hover {
-    background: rgba(255, 255, 255, 0.02);
-}
-
 .MMM-Luftdaten .sensor .label {
     flex-grow: 1;
     text-align: left;
-    color: #aeaeae;
-    font-weight: 500;
+}
+.MMM-Luftdaten .sensor i {
+    margin: 2px;
 }
 
-.MMM-Luftdaten .sensor span:not(.label) {
-    font-weight: 600;
-    color: #eaeaea;
-}
-
-.MMM-Luftdaten .sensor i.tendency {
-    font-size: 80%;
-    margin: 0 4px;
-}
-
-.MMM-Luftdaten i[class*="arrow-alt-circle-up"] {
-    color: #ff5252; /* Coral red for rising trend */
-}
-
-.MMM-Luftdaten i[class*="arrow-alt-circle-down"] {
-    color: #4caf50; /* Emerald green for falling trend */
-}
-
-@keyframes pulse-soft {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 0.9;
-    }
-    50% {
-        transform: scale(1.06);
-        opacity: 1;
-    }
+.MMM-Luftdaten i.tendency {
+    font-size: 76%;
 }
