@@ -1,13 +1,9 @@
 var NodeHelper = require("node_helper");
-// const AbortController = require("abort-controller");
 
 module.exports = NodeHelper.create({
   moduleName: "MMM-Luftdaten",
   state: {
     sensorApi: "https://data.sensor.community/airrohr/v1/sensor/",
-    sensorHost: null,
-    sensorData: {},
-    lastUpdate: null,
     sensorTypeAssignments: {
       P1: "pm10",
       P2: "pm25",
@@ -15,45 +11,56 @@ module.exports = NodeHelper.create({
       pressure: "pressure",
       humidity: "humidity"
     },
-    sensors: {}
+    sensors: {}, // maps sensorId to interval config and metadata
+    sensorData: {} // maps sensorId to sensor metrics
   },
+
   // Override start method.
   start: function () {
-    this.fetchers = [];
     console.log("Starting node helper for: " + this.name);
   },
+
   // Override socketNotificationReceived method.
   socketNotificationReceived: function (notification, payload) {
     if (notification === "ADD_SENSOR") {
-      var { sensorId, fetchInterval, sensorIsHost } = payload;
-      var instance = this;
-      if (sensorIsHost) this.state.sensorHost = sensorId;
-      if (payload && sensorId && fetchInterval) {
+      const { sensorId, fetchInterval, sensorIsHost } = payload;
+      if (sensorId && fetchInterval) {
         if (!this.state.sensors[sensorId]) {
-          instance.fetchApiData(sensorId);
-          this.state.sensors[sensorId] = setInterval(function () {
-            instance.fetchApiData(sensorId);
-          }, this.getUpdateInterval(fetchInterval));
+          this.state.sensorData[sensorId] = {};
+          this.fetchApiData(sensorId, sensorIsHost);
+          this.state.sensors[sensorId] = {
+            interval: setInterval(() => {
+              this.fetchApiData(sensorId, sensorIsHost);
+            }, this.getUpdateInterval(fetchInterval)),
+            sensorIsHost: sensorIsHost
+          };
         } else {
-          //when sensor already exists, directly update data on all clients
-          this.sendDataToClient();
+          // when sensor already exists, directly update data on all clients
+          this.sendDataToClient(sensorId);
         }
       }
     }
   },
-  sendDataToClient: function () {
+
+  sendDataToClient: function (sensorId) {
     this.sendSocketNotification("SENSOR_DATA_RECEIVED", {
-      sensorData: this.state.sensorData,
-      lastUpdate: this.state.sensorData["lastUpdate"]
+      sensorId: sensorId,
+      sensorData: this.state.sensorData[sensorId]
     });
   },
-  sendErrorToClient: function () {
+
+  sendErrorToClient: function (sensorId) {
     this.sendSocketNotification("SENSOR_DATA_CONNECTION_ERROR", {
-      lastUpdate: this.state.sensorData["lastUpdate"]
+      sensorId: sensorId,
+      lastUpdate: this.state.sensorData[sensorId] ? this.state.sensorData[sensorId].lastUpdate : null
     });
   },
+
   // Update Sensor Data.
-  updateSensorData: function (sensors, timestamp) {
+  updateSensorData: function (sensorId, sensors, timestamp) {
+    if (!this.state.sensorData[sensorId]) {
+      this.state.sensorData[sensorId] = {};
+    }
     for (let index in sensors) {
       const sensor = sensors[index];
       let sensorType = sensor.value_type;
@@ -63,39 +70,41 @@ module.exports = NodeHelper.create({
 
       if (sensor && this.isValidSensorType(sensorType)) {
         let type = this.getSensorKeyFromType(sensorType);
-        this.state.sensorData[type] = sensor.value;
+        this.state.sensorData[sensorId][type] = sensor.value;
       }
     }
     if (timestamp) {
-      this.state.sensorData["lastUpdate"] = timestamp;
+      this.state.sensorData[sensorId].lastUpdate = timestamp;
     }
-    this.sendDataToClient();
-    //console.log("SensorDataUpdated:", this.state.sensorData, timestamp);
+    this.sendDataToClient(sensorId);
   },
+
   getSensorKeyFromType(name) {
     return this.state.sensorTypeAssignments[name];
   },
+
   isValidSensorType(name) {
-    return this.state.sensorTypeAssignments[name] || false;
+    return !!this.state.sensorTypeAssignments[name];
   },
-  async fetchApiData(sensorId) {
+
+  async fetchApiData(sensorId, sensorIsHost) {
     let url;
 
-    if (this.state.sensorHost) {
-      url = `http://${this.state.sensorHost}/data.json`;
+    if (sensorIsHost) {
+      url = `http://${sensorId}/data.json`;
     } else if (sensorId) {
       url = this.state.sensorApi + sensorId + "/";
     }
+
     console.log(`${this.moduleName}: fetchData from ${url}`);
     if (!url) {
       console.error(
-        `${this.moduleName}:  missconfiguration sensorHost or sensorIds has to be set!`
+        `${this.moduleName}: misconfiguration sensorHost or sensorId has to be set!`
       );
-      this.sendErrorToClient();
+      this.sendErrorToClient(sensorId);
       return;
     }
 
-    const instance = this;
     try {
       const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
       if (response.ok) {
@@ -103,24 +112,25 @@ module.exports = NodeHelper.create({
         if (Array.isArray(data)) {
           if (data.length) {
             const { sensordatavalues, timestamp } = data[0];
-            instance.updateSensorData(sensordatavalues, timestamp);
+            this.updateSensorData(sensorId, sensordatavalues, timestamp);
           } else {
-            throw `Empty response`;
+            throw new Error(`Empty response`);
           }
-        } else if (Array.isArray(data.sensordatavalues)) {
-          instance.updateSensorData(data.sensordatavalues, new Date());
+        } else if (data && Array.isArray(data.sensordatavalues)) {
+          this.updateSensorData(sensorId, data.sensordatavalues, new Date().toISOString());
         }
       } else {
         const error = await response.text();
-        throw `No positive response ${error}`;
+        throw new Error(`No positive response: ${error}`);
       }
     } catch (e) {
-      console.error(`${this.moduleName}: ${e.message || e}`);
-      this.sendErrorToClient();
+      console.error(`${this.moduleName} [Sensor ${sensorId}]: ${e.message || e}`);
+      this.sendErrorToClient(sensorId);
     }
   },
+
   getUpdateInterval(minutes) {
-    const min = !minutes || minutes < 5 ? 5 : minutes;
+    const min = !minutes || minutes < 1 ? 1 : minutes;
     return min * 60 * 1000;
   }
 });
