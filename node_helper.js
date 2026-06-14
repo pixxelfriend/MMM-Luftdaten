@@ -14,12 +14,12 @@ module.exports = NodeHelper.create({
     sensors: {}, // maps sensorId to interval config and metadata
     sensorData: {} // maps sensorId to sensor metrics
   },
-  
+
   // Override start method.
   start: function () {
     console.log("Starting node helper for: " + this.name);
   },
-  
+
   // Override socketNotificationReceived method.
   socketNotificationReceived: function (notification, payload) {
     if (notification === "ADD_SENSOR") {
@@ -41,21 +41,21 @@ module.exports = NodeHelper.create({
       }
     }
   },
-  
+
   sendDataToClient: function (sensorId) {
     this.sendSocketNotification("SENSOR_DATA_RECEIVED", {
       sensorId: sensorId,
       sensorData: this.state.sensorData[sensorId]
     });
   },
-  
+
   sendErrorToClient: function (sensorId) {
     this.sendSocketNotification("SENSOR_DATA_CONNECTION_ERROR", {
       sensorId: sensorId,
       lastUpdate: this.state.sensorData[sensorId] ? this.state.sensorData[sensorId].lastUpdate : null
     });
   },
-  
+
   // Update Sensor Data.
   updateSensorData: function (sensorId, sensors, timestamp) {
     if (!this.state.sensorData[sensorId]) {
@@ -78,15 +78,15 @@ module.exports = NodeHelper.create({
     }
     this.sendDataToClient(sensorId);
   },
-  
+
   getSensorKeyFromType(name) {
     return this.state.sensorTypeAssignments[name];
   },
-  
+
   isValidSensorType(name) {
     return !!this.state.sensorTypeAssignments[name];
   },
-  
+
   async fetchApiData(sensorId, sensorIsHost) {
     let url;
 
@@ -95,7 +95,7 @@ module.exports = NodeHelper.create({
     } else if (sensorId) {
       url = this.state.sensorApi + sensorId + "/";
     }
-    
+
     console.log(`${this.moduleName}: fetchData from ${url}`);
     if (!url) {
       console.error(
@@ -106,7 +106,7 @@ module.exports = NodeHelper.create({
     }
 
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
@@ -128,7 +128,7 @@ module.exports = NodeHelper.create({
       this.sendErrorToClient(sensorId);
     }
   },
-  
+
   getUpdateInterval(minutes) {
     const min = !minutes || minutes < 1 ? 1 : minutes;
     return min * 60 * 1000;
