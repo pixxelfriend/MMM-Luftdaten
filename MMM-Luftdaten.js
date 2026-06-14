@@ -2,14 +2,12 @@ Module.register("MMM-Luftdaten",{
 	//default module config
 	defaults: {
 		sensors: [],
-		sensorData: {},
-		fetchInterval: 5, // update intervall in minutes
+		sensorHost: null,
+		fetchInterval: 5, // update interval in minutes
 		timeOnly: false,
 		withBorder: true,
 		borderClass: "border",
-		displayTendency: true,
-		connected: false,
-		error: false
+		displayTendency: true
 	},
 
 	// Define required scripts.
@@ -36,53 +34,66 @@ Module.register("MMM-Luftdaten",{
 
 	// Override start method.
 	start: function () {
-		this.defaults = {
-			...this.defaults,
-			...this.config
-		}
-		const {sensorHost} = this.defaults
-		if(sensorHost){
-			const sensorIsHost = sensorHost ? true : false
-			this.addSensor(sensorHost,this.defaults.fetchInterval, sensorIsHost)
-		} else {
-			for(let index of this.defaults.sensors){
-				//inital fetch of sensor data
-				this.addSensor(index,this.defaults.fetchInterval)
+		this.sensorData = {};
+		this.connected = false;
+		this.error = false;
+		this.lastUpdate = null;
+
+		const { sensorHost, sensors, fetchInterval } = this.config;
+		if (sensorHost) {
+			this.addSensor(sensorHost, fetchInterval, true);
+		} else if (sensors && sensors.length > 0) {
+			for (let id of sensors) {
+				// initial fetch of sensor data
+				this.addSensor(id, fetchInterval, false);
 			}
 		}
 	},
+
 	addSensor: function(sensorId, fetchInterval, sensorIsHost){
 		this.sendSocketNotification("ADD_SENSOR", {
 			sensorId, fetchInterval, sensorIsHost
 		});
 	},
+
 	// Override socket notification handler.
 	socketNotificationReceived: function (notification, payload) {
+		const { sensorId, sensorData, lastUpdate } = payload;
+		
+		// Check if this notification is for a sensor configured in this instance
+		const isRelevant = this.config.sensorHost === sensorId ||
+			(this.config.sensors && this.config.sensors.includes(sensorId));
+
+		if (!isRelevant) return;
+
 		if (notification === "SENSOR_DATA_RECEIVED") {
-			if(payload.sensorData){
-				this.defaults.error = false
-				this.defaults.connected = true
-				this.defaults.lastUpdate = payload.sensorData.lastUpdate
-				this.defaults.sensorData = this.createSensorTemplateData(payload.sensorData)
+			if (sensorData) {
+				this.error = false;
+				this.connected = true;
+				this.lastUpdate = sensorData.lastUpdate;
+				this.sensorData = {
+					...this.sensorData,
+					...this.createSensorTemplateData(sensorData)
+				};
 			}
-		} else if(notification === "SENSOR_DATA_CONNECTION_ERROR"){
-			this.defaults.error = true
-			if(payload.lastUpdate) {
-				this.defaults.lastUpdate = payload.lastUpdate
+		} else if (notification === "SENSOR_DATA_CONNECTION_ERROR") {
+			this.error = true;
+			if (lastUpdate) {
+				this.lastUpdate = lastUpdate;
 			}
 		} else {
-			Log.log("MMM-Luftdatan received an unknown socket notification: " + notification);
+			Log.log("MMM-Luftdaten received an unknown socket notification: " + notification);
 		}
 
 		this.updateDom(this.config.animationSpeed);
 	},
 
 	createSensorTemplateData: function (data){
-		const sensors = {}
-		delete data.lastUpdate;
-		for(let key in data){
-			const sensor = {}
-			sensor.value = parseFloat(data[key])
+		const sensors = {};
+		for (let key in data) {
+			if (key === "lastUpdate") continue;
+			const sensor = {};
+			sensor.value = parseFloat(data[key]);
 			switch(key){
 				case "pressure":
 					sensor.label = this.translate("PRESSURE");
@@ -95,35 +106,39 @@ Module.register("MMM-Luftdaten",{
 					break;
 			}
 
-			if(this.defaults.displayTendency && this.defaults.sensorData[key]){
-				sensor.tendency = this.getTendency(this.defaults.sensorData[key].value, sensor.value)
+			if (this.config.displayTendency && this.sensorData[key]) {
+				sensor.tendency = this.getTendency(this.sensorData[key].value, sensor.value);
 			}
-			sensors[key] = sensor
+			sensors[key] = sensor;
 		}
-		return sensors
+		return sensors;
 	},
+
 	getTendency: function(oldValue, newValue){
 		if(oldValue === newValue) return false;
-		if(oldValue < newValue) return "up"
-		return "down"
+		if(oldValue < newValue) return "up";
+		return "down";
 	},
+
 	getTemplateData: function () {
 		const data = {
-			...this.defaults.sensorData,
-			lastUpdate: this.formatDate(this.defaults.lastUpdate),
-			borderClass: this.defaults.withBorder ? this.defaults.borderClass : '',
-			connected: this.defaults.connected,
-			error: this.defaults.error,
+			...this.sensorData,
+			lastUpdate: this.formatDate(this.lastUpdate),
+			borderClass: this.config.withBorder ? this.config.borderClass : '',
+			connected: this.connected,
+			error: this.error,
 			text: {
 				CONNECTING: this.translate("CONNECTING"),
 				CONNECTION_ERROR: this.translate("CONNECTION_ERROR")
 			}
-		}
+		};
 		return data;
 	},
+
 	formatDate: function (dateString){
-		const format = this.defaults.timeOnly ? "LT" : "L LT"
-		const date = moment.utc(dateString).local()
-		return date.format(format)
+		if (!dateString) return "";
+		const format = this.config.timeOnly ? "LT" : "L LT";
+		const date = moment.utc(dateString).local();
+		return date.format(format);
 	}
 });
