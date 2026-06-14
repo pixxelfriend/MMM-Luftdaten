@@ -97,7 +97,7 @@ module.exports = NodeHelper.create({
 
     const instance = this;
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
@@ -111,11 +111,11 @@ module.exports = NodeHelper.create({
           instance.updateSensorData(data.sensordatavalues, new Date());
         }
       } else {
-        const error = response.text();
+        const error = await response.text();
         throw `No positive response ${error}`;
       }
     } catch (e) {
-      console.error(`${this.moduleName}: ${e}`);
+      console.error(`${this.moduleName}: ${e.message || e}`);
       this.sendErrorToClient();
     }
   },
