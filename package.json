@@ -1,0 +1,29 @@
+{
+  "name": "mmm-luftdaten",
+  "version": "1.0.0",
+  "description": "A MagicMirror² module displaying PM10, PM2.5, temperature, humidity, and pressure from Luftdaten.info / Sensor.community sensors.",
+  "main": "MMM-Luftdaten.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pixxelfriend/MMM-Luftdaten.git"
+  },
+  "keywords": [
+    "magicmirror",
+    "magicmirror-module",
+    "luftdaten",
+    "sensor-community",
+    "airrohr"
+  ],
+  "author": "Steffen Hoffmann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pixxelfriend/MMM-Luftdaten/issues"
+  },
+  "homepage": "https://github.com/pixxelfriend/MMM-Luftdaten#readme",
+  "engines": {
+    "node": ">=18"
+  }
+}
